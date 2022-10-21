@@ -97,7 +97,19 @@ def get_weather(province, city):
     # print(response_json)
     weatherinfo = response_json["weatherinfo"]
     # 天气
-    weather = weatherinfo["weather"]
+     _weather = str(weatherinfo["weather"])
+    if(_weather == "晴"):
+        weather="☀️"+_weather
+    elif(_weather == "阴"):
+        weather="☁️"+_weather    
+    elif(_weather.find("云")!=-1):
+        weather="☁️"+_weather
+    elif(_weather.find("雨")!=-1):
+        weather="⛈️"+_weather
+    elif(_weather.find("雪")!=-1):
+        weather="❄️"+_weather
+    elif(_weather.find("雾")!=-1 or _weather.find("️霾")!=-1):
+        weather="🌫️"+_weather
     # 最高气温
     temp = weatherinfo["temp"]
     # 最低气温
@@ -120,6 +132,14 @@ def get_ciba():
         return note_ch, note_en
     else:
         return "", ""
+    
+# 表情
+def get_emoticon():
+    emoticon_list = ["(￣▽￣)~*", "(～￣▽￣)～", "︿(￣︶￣)︿", "~(￣▽￣)~*", "(oﾟ▽ﾟ)o", "ヾ(✿ﾟ▽ﾟ)ノ", "٩(๑❛ᴗ❛๑)۶", "ヾ(◍°∇°◍)ﾉﾞ",
+                     "ヾ(๑╹◡╹)ﾉ", "(๑´ㅂ`๑)", "(*´ﾟ∀ﾟ｀)ﾉ", "(´▽`)ﾉ", "ヾ(●´∀｀●)",
+                     "(｡◕ˇ∀ˇ◕)", "(≖ᴗ≖)✧", "(◕ᴗ◕✿)", "(❁´◡`❁)*✲ﾟ*", "(๑¯∀¯๑)", "(*´・ｖ・)", "(づ｡◕ᴗᴗ◕｡)づ", "o(*￣▽￣*)o",
+                     "(｀・ω・´)", "( • ̀ω•́ )✧", "ヾ(=･ω･=)o", "(￣３￣)a", "(灬°ω°灬)", "ヾ(•ω•`。)", "｡◕ᴗ◕｡"]
+    return random.choice(emoticon_list)
 
 
 # 彩虹屁
@@ -320,7 +340,11 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
             "anniversary": {
                 "value": anniversary,
                 "color": get_color()
-            }
+            },
+            "emotion": {
+                "value": emotion,
+                "color": get_color()
+            },
 
         }
     }
@@ -393,6 +417,8 @@ if __name__ == "__main__":
     lizhi = lizhi()
     # 星座运势
     lucky = lucky()
+    # 表情
+    emotion = get_emoticon()
     # 公众号推送消息
     for user in users:
         send_message(user, accessToken, city, weather, max_temperature, min_temperature,
