@@ -97,7 +97,7 @@ def get_weather(province, city):
     # print(response_json)
     weatherinfo = response_json["weatherinfo"]
     # 天气
-     _weather = str(weatherinfo["weather"])
+    _weather = str(weatherinfo["weather"])
     if(_weather == "晴"):
         weather="☀️"+_weather
     elif(_weather == "阴"):
