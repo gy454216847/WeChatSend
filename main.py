@@ -225,7 +225,7 @@ def tip():
         res = conn.getresponse()
         data = res.read()
         data = json.loads(data)
-        pop = data["newslist"][0]["pop"]
+        pop = data["newslist"][0]["pcpn"]
         tips = data["newslist"][0]["tips"]
         return pop, tips
     else:
