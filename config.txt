@@ -10,9 +10,9 @@
 "user": ["o_89I63N8tBk2qDej7jTWOw4iYYg","o_89I6xtwoUNzYGZ9zepkKWGjxig"],
 # 信息配置
 # 所在省份
-"province": "江西",
+"province": "贵州",
 # 所在城市
-"city": "宜春",
+"city": "黔东南",
 # 生日1，如果生日为农历，在最前面加上r即可，如r1999-01-01
 "birthday1": "1990-03-29",
 # 生日2
