@@ -33,8 +33,8 @@ def get_access_token():
     except KeyError:
         print("获取access_token失败，请检查app_id和app_secret是否正确")
         os.system("pause")
+
         sys.exit(1)
-    # print(access_token)
     return access_token
 
 
@@ -73,6 +73,27 @@ def get_birthday(birthday, year, today):
     return birth_day
 
 
+def get_anniversary(anniversaryday, year, today):
+    # 获取纪念日年份
+    anniversary_year = anniversaryday.split("-")[0]
+    # 获取纪念日的今年对应月和日
+    anniversary_month = int(anniversaryday.split("-")[1])
+    anniversary_day = int(anniversaryday.split("-")[2])
+    # 今年纪念日
+    year_date = date(year, anniversary_month, anniversary_day)
+
+    if today > year_date:
+        anniversary_date = date((year+1), anniversary_month, anniversary_day)
+        anniversary_day = str(anniversary_date.__sub__(today)).split(" ")[0]
+    elif today == year_date:
+        anniversary_day=0
+    else:
+        anniversary_date=year_date
+        anniversary_day = str(anniversary_date.__sub__(today)).split(" ")[0]
+
+    return anniversary_day
+
+
 def get_weather(province, city):
     # 城市id
     try:
@@ -98,19 +119,19 @@ def get_weather(province, city):
     weatherinfo = response_json["weatherinfo"]
     # 天气
     _weather = str(weatherinfo["weather"])
-    if(_weather == "晴"):
-        weather="☀️"+_weather
-    elif(_weather == "阴"):
-        weather="☁️"+_weather    
-    elif(_weather.find("云")!=-1):
-        weather="☁️"+_weather
-    elif(_weather.find("雨")!=-1):
-        weather="⛈️"+_weather
-    elif(_weather.find("雪")!=-1):
-        weather="❄️"+_weather
-    elif(_weather.find("雾")!=-1 or _weather.find("️霾")!=-1):
-        weather="🌫️"+_weather
-    # 最高气温
+    if (_weather == "晴"):
+        weather = "☀️"+_weather
+    elif (_weather == "阴"):
+        weather = "☁️"+_weather
+    elif (_weather.find("云") != -1):
+        weather = "☁️"+_weather
+    elif (_weather.find("雨") != -1):
+        weather = "⛈️"+_weather
+    elif (_weather.find("雪") != -1):
+        weather = "❄️"+_weather
+    elif (_weather.find("雾") != -1 or _weather.find("️霾") != -1):
+        weather = "🌫️"+_weather
+        # 最高气温
     temp = weatherinfo["temp"]
     # 最低气温
     tempn = weatherinfo["tempn"]
@@ -132,8 +153,10 @@ def get_ciba():
         return note_ch, note_en
     else:
         return "", ""
-    
+
 # 表情
+
+
 def get_emoticon():
     emoticon_list = ["(￣▽￣)~*", "(～￣▽￣)～", "︿(￣︶￣)︿", "~(￣▽￣)~*", "(oﾟ▽ﾟ)o", "ヾ(✿ﾟ▽ﾟ)ノ", "٩(๑❛ᴗ❛๑)۶", "ヾ(◍°∇°◍)ﾉﾞ",
                      "ヾ(๑╹◡╹)ﾉ", "(๑´ㅂ`๑)", "(*´ﾟ∀ﾟ｀)ﾉ", "(´▽`)ﾉ", "ヾ(●´∀｀●)",
@@ -141,8 +164,9 @@ def get_emoticon():
                      "(｀・ω・´)", "( • ̀ω•́ )✧", "ヾ(=･ω･=)o", "(￣３￣)a", "(灬°ω°灬)", "ヾ(•ω•`。)", "｡◕ᴗ◕｡"]
     return random.choice(emoticon_list)
 
-
 # 彩虹屁
+
+
 def caihongpi():
     if (caihongpi_API == "dfe766fa7f08ae4100cffd485f121ff6"):
         conn = http.client.HTTPSConnection('api.tianapi.com')  # 接口域名
@@ -155,10 +179,8 @@ def caihongpi():
         data = data["newslist"][0]["content"]
         if ("XXX" in data):
             data.replace("XXX", "小可爱")
-        print(data)
         return data
     else:
-        print(123)
         return ""
 
 # 健康小提示API
@@ -221,19 +243,24 @@ def tip():
         conn = http.client.HTTPSConnection('api.tianapi.com')  # 接口域名
         params = urllib.parse.urlencode({'key': tianqi_API, 'city': city})
         headers = {'Content-type': 'application/x-www-form-urlencoded'}
-        conn.request('POST', '/tianqi/index', params, headers)
+        # _city=urllib.parse.quote(city)
+        url = "/tianqi/index"
+        conn.request('POST', url, params, headers=headers)
         res = conn.getresponse()
         data = res.read()
         data = json.loads(data)
         pop = data["newslist"][0]["pcpn"]
         tips = data["newslist"][0]["tips"]
-        return pop, tips
+        wind = data["newslist"][0]["windsc"]
+        humidity = data["newslist"][0]["humidity"]
+        return pop, tips, wind, humidity
     else:
         return "", ""
 
 # 推送信息
 
-def send_message(to_user, access_token, city_name, weather, max_temperature, min_temperature, pipi, lizhi, pop, tips, note_en, note_ch, health_tip, lucky):
+
+def send_message(to_user, access_token, city_name, weather, max_temperature, min_temperature, pipi, lizhi, pop, tips, wind, humidity, note_en, note_ch, health_tip, lucky):
     url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(
         access_token)
     week_list = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
@@ -249,20 +276,9 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
     love_date = date(love_year, love_month, love_day)
     # 获取在一起的日期差
     love_days = str(today.__sub__(love_date)).split(" ")[0]
+    #获取结婚纪念日
+    anniversaryday=get_anniversary(config["anniversary_date"],year,today)
 
-    # 获取结婚纪念日的日期格式
-    anniversary_year = int(config["anniversary_date"].split("-")[0])
-    anniversary_month = int(config["anniversary_date"].split("-")[1])
-    anniversary_day = int(config["anniversary_date"].split("-")[2])
-    anniversary_date = date(anniversary_year,anniversary_month,anniversary_day)
-
-    #获取在一起的日期差
-    _anniversary=str(today.__sub__(anniversary_date)).split(" ")[0]
-
-    if(_anniversary.find("-")!=-1):
-        anniversary=_anniversary[1:]
-    else:
-        anniversary=_anniversary
 
     # 获取所有生日数据
     birthdays = {}
@@ -338,14 +354,21 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
                 "color": get_color()
             },
             "anniversary": {
-                "value": anniversary,
+                "value": anniversaryday,
                 "color": get_color()
             },
             "emotion": {
                 "value": emotion,
                 "color": get_color()
             },
-
+            "wind": {
+                "value": wind,
+                "color": get_color()
+            },
+            "humidity": {
+                "value": humidity,
+                "color": get_color()
+            },
         }
     }
     for key, value in birthdays.items():
@@ -373,12 +396,12 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
 
 if __name__ == "__main__":
     try:
-        with open("config.txt", encoding="utf-8") as f:
-            config = eval(f.read())
+        with open(file="config.txt", encoding="utf-8") as f:
+             config = eval(f.read())
     except FileNotFoundError:
         print("推送消息失败，请检查config.txt文件是否与程序位于同一路径")
         os.system("pause")
-        sys.exit(1)
+        sys.exit(1) 
     except SyntaxError:
         print("推送消息失败，请检查配置文件格式是否正确")
         os.system("pause")
@@ -411,8 +434,8 @@ if __name__ == "__main__":
     pipi = caihongpi()
     # 健康小提示
     health_tip = health()
-    # 下雨概率和建议
-    pop, tips = tip()
+    # 下雨概率,建议,风力，空气质量，湿度
+    pop, tips, wind, humidity = tip()
     # 励志名言
     lizhi = lizhi()
     # 星座运势
@@ -422,7 +445,7 @@ if __name__ == "__main__":
     # 公众号推送消息
     for user in users:
         send_message(user, accessToken, city, weather, max_temperature, min_temperature,
-                     pipi, lizhi, pop, tips, note_en, note_ch, health_tip, lucky)
+                     pipi, lizhi, pop, tips, wind, humidity, note_en, note_ch, health_tip, lucky)
     import time
     time_duration = 3.5
     time.sleep(time_duration)
